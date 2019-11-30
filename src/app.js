@@ -1,6 +1,8 @@
 import * as tf from '@tensorflow/tfjs';
 import * as speechCommands from '@tensorflow-models/speech-commands';
 import '@babel/polyfill'
+import wordsToNumbers from 'words-to-numbers';
+
 // When calling `create()`, you must provide the type of the audio input.
 // The two available options are `BROWSER_FFT` and `SOFT_FFT`.
 // - BROWSER_FFT uses the browser's native Fourier transform.
@@ -13,86 +15,171 @@ let saidDiv = document.getElementById('saidDiv')
 // requests.
 let words = []
 async function loadModel(){
-  await recognizer.ensureModelLoaded();
+  await recognizer.ensureModelLoaded()
+  await setInterval(update,  100)
+  // See the array of words that the recognizer is trained to recognize.
+  console.log(recognizer.wordLabels())
+  words = recognizer.wordLabels()
+  // `listen()` takes two arguments:
+  // 1. A callback function that is invoked anytime a word is recognized.
+  // 2. A configuration object with adjustable fields such a
+  //    - includeSpectrogram
+  //    - probabilityThreshold
+  //    - includeEmbedding
+  recognizer.listen(result => {
+    // - result.scores contains the probability scores that correspond to
+    //   recognizer.wordLabels().
+    // - result.spectrogram contains the spectrogram of the recognized word.
+    //console.log(result.scores)
+    result.scores.map( x  =>{
+      // console.log(words)
+      if(x === 1){
+        // console.log(words[result.scores.indexOf(x)])
+        saidDiv.innerHTML = words[result.scores.indexOf(x)]
+      }
+    })
 
-// See the array of words that the recognizer is trained to recognize.
-console.log(recognizer.wordLabels());
-words = recognizer.wordLabels()
-// `listen()` takes two arguments:
-// 1. A callback function that is invoked anytime a word is recognized.
-// 2. A configuration object with adjustable fields such a
-//    - includeSpectrogram
-//    - probabilityThreshold
-//    - includeEmbedding
-recognizer.listen(result => {
-  // - result.scores contains the probability scores that correspond to
-  //   recognizer.wordLabels().
-  // - result.spectrogram contains the spectrogram of the recognized word.
-  console.log(result.scores)
-  result.scores.map( x  =>{
-    // console.log(words)
-    if(x === 1){
-      console.log(words[result.scores.indexOf(x)])
-      saidDiv.innerHTML = words[result.scores.indexOf(x)]
-    }
+  }, {
+    includeSpectrogram: true,
+    probabilityThreshold: 0.75
   })
+  recognizer.listen()
+  // Stop the recognition in 10 seconds.
+  setTimeout(() => recognizer.stopListening(), 10e3)
 
-}, {
-  includeSpectrogram: true,
-  probabilityThreshold: 0.75
-});
-recognizer.listen()
-// Stop the recognition in 10 seconds.
-setTimeout(() => recognizer.stopListening(), 10e3);
 }
 
 loadModel()
 
 
 
+import './style.scss'
 
 const canvas = document.getElementById('game')
 const ctx = canvas.getContext('2d')
+const scoreDiv = document.getElementById('score')
+const highScoreDiv = document.getElementById('highScore')
 
+
+document.addEventListener('keydown', function (e) {
+
+
+
+  if(e.keyCode===82){
+    if(score > highScore){
+      highScore = score
+    }
+
+    speed =  1
+    score = 0
+    playing = true
+    // wall.posX= canvas.width-10
+    // wall.gap = Math.floor(Math.random()*  canvas.height-(player.size+10))
+    player.posY = wall.gap+5
+    speed = 9
+  }
+
+
+})
+
+
+
+let speed = 1
+let score = 0
+let highScore = 0
+scoreDiv.innerHTML = score
+highScoreDiv.innerHTML = highScore
 
 const player = {
   posX: 200,
   posY: 200,
-  size: 40,
+  size: 40
+
 
 }
 
+const wall ={
+  posX: canvas.width-10,
+  posY: 0,
+  height: canvas.height,
+  gap: Math.floor(Math.random()*  canvas.height-(player.size+10))
+
+}
+let playing = true
+ctx.clearRect(0, 0, canvas.width, canvas.height)
+ctx.globalAlpha = 0.2
+ctx.fillStyle = 'green'
+ctx.fillRect(player.posX, player.posY, player.size, player.size)
+ctx.globalAlpha = 0.7
+ctx.fillStyle = 'blue'
+ctx.fillRect(wall.posX, wall.posY, 10, wall.gap)
+ctx.fillRect(wall.posX, 0+wall.gap +60 , 10, canvas.height)
+
 function  update(){
+  scoreDiv.innerHTML = score
+  highScoreDiv.innerHTML = highScore
+  if(!isNaN(wordsToNumbers(saidDiv.innerHTML))){
+    speed = wordsToNumbers(saidDiv.innerHTML)
+  }
+  if(playing){
+    wall.posX-=speed
+    if(saidDiv.innerHTML === 'left'){
+      if(player.posX>0){
+        player.posX -=speed
+      }
 
-  if(saidDiv.innerHTML === 'left'){
-    player.posX --
+    }
+
+    if(saidDiv.innerHTML === 'right'){
+      if(player.posX<canvas.width-player.size){
+        player.posX += speed
+      }
+
+    }
+
+    if(saidDiv.innerHTML === 'up'){
+      if(player.posY > 0){
+        player.posY -= speed
+      }
+
+    }
+
+    if(saidDiv.innerHTML === 'down'){
+      if(player.posY<canvas.height-player.size){
+        player.posY += speed
+      }
+
+    }
 
   }
 
-  if(saidDiv.innerHTML === 'right'){
-    player.posX ++
+  if(player.posX > wall.posX && player.posY > wall.gap && player.posY < wall.gap+60){
+    score+= speed
+    wall.posX = canvas.width-10
+    wall.gap = Math.floor(Math.random()*  canvas.height-(player.size+10))
 
   }
+  if(player.posX > (wall.posX+10)){
+    playing = false
+    saidDiv.innerHTML === 'R TO RESET'
 
-  if(saidDiv.innerHTML === 'up'){
-    player.posY --
-
-  }
-
-  if(saidDiv.innerHTML === 'down'){
-    player.posY ++
 
   }
-
 
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   ctx.globalAlpha = 0.2
   ctx.fillStyle = 'green'
   ctx.fillRect(player.posX, player.posY, player.size, player.size)
+  ctx.globalAlpha = 0.7
+  ctx.fillStyle = 'blue'
+  ctx.fillRect(wall.posX, wall.posY, 10, wall.gap)
+  ctx.fillRect(wall.posX, 0+wall.gap +60 , 10, canvas.height)
 
 
 }
 
 
 
-setInterval(update,  100)
+// if(words.length >  1){
+//   setInterval(update,  100)
+// }
