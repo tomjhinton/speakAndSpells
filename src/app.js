@@ -60,9 +60,10 @@ const scoreDiv = document.getElementById('score')
 const highScoreDiv = document.getElementById('highScore')
 const rules = document.getElementById('rules')
 var options = {
-  strings: ['First sentence.', 'Fit the block through the gap. Move it by speaking.',' You can move it up, down, left or right.', 'Increase the speed to score more points.'],
+  strings: ['First sentence.', 'Fit the block through the gap. Control it by speaking.',' You can move it up, down, left or right.', 'Increase the speed to score more points.',' Accepts numbers 1 - 9.', "If it can't undestand you, the problem is either the AI or you."],
   typeSpeed: 40,
   showCursor: false
+
 }
 
 var typed = new Typed(rules, options)
