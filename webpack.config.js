@@ -2,7 +2,7 @@ const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
-
+var fs = require('fs')
 
 module.exports = {
   entry: './src/app.js',
@@ -11,6 +11,7 @@ module.exports = {
     filename: 'bundle.js'
 
   },
+  node: { fs: 'empty' },
   devtool: 'source-maps',
   module: {
     rules: [

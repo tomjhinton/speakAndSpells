@@ -1,16 +1,16 @@
-import * as tf from '@tensorflow/tfjs';
-import * as speechCommands from '@tensorflow-models/speech-commands';
+import * as tf from '@tensorflow/tfjs'
+import * as speechCommands from '@tensorflow-models/speech-commands'
 import '@babel/polyfill'
-import wordsToNumbers from 'words-to-numbers';
+import wordsToNumbers from 'words-to-numbers'
+import Typed from 'typed.js'
 
 // When calling `create()`, you must provide the type of the audio input.
 // The two available options are `BROWSER_FFT` and `SOFT_FFT`.
 // - BROWSER_FFT uses the browser's native Fourier transform.
 // - SOFT_FFT uses JavaScript implementations of Fourier transform
 //   (not implemented yet).
-const recognizer = speechCommands.create('BROWSER_FFT');
-let said = []
-let saidDiv = document.getElementById('saidDiv')
+const recognizer = speechCommands.create('BROWSER_FFT')
+const saidDiv = document.getElementById('saidDiv')
 // Make sure that the underlying model and metadata are loaded via HTTPS
 // requests.
 let words = []
@@ -54,11 +54,20 @@ loadModel()
 
 
 import './style.scss'
-
 const canvas = document.getElementById('game')
 const ctx = canvas.getContext('2d')
 const scoreDiv = document.getElementById('score')
 const highScoreDiv = document.getElementById('highScore')
+const rules = document.getElementById('rules')
+var options = {
+  strings: ['First sentence.', 'Fit the block through the gap. Move it by speaking.',' You can move it up, down, left or right.', 'Increase the speed to score more points.'],
+  typeSpeed: 40,
+  showCursor: false
+}
+
+var typed = new Typed(rules, options)
+
+
 
 
 document.addEventListener('keydown', function (e) {
@@ -73,10 +82,10 @@ document.addEventListener('keydown', function (e) {
     speed =  1
     score = 0
     playing = true
-    // wall.posX= canvas.width-10
-    // wall.gap = Math.floor(Math.random()*  canvas.height-(player.size+10))
-    player.posY = wall.gap+5
-    speed = 9
+    saidDiv.innerHTML = 'speakAndSpells'
+    wall.posX= canvas.width-10
+    wall.gap = Math.ceil(Math.random()*  230)
+
   }
 
 
@@ -102,8 +111,13 @@ const wall ={
   posX: canvas.width-10,
   posY: 0,
   height: canvas.height,
-  gap: Math.floor(Math.random()*  canvas.height-(player.size+10))
+  gap: Math.ceil(Math.random()*  230)
 
+}
+console.log(wall.gap)
+
+for(let i=0;i<10;i++){
+  console.log(Math.ceil(Math.random()*  230))
 }
 let playing = true
 ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -156,12 +170,12 @@ function  update(){
   if(player.posX > wall.posX && player.posY > wall.gap && player.posY < wall.gap+60){
     score+= speed
     wall.posX = canvas.width-10
-    wall.gap = Math.floor(Math.random()*  canvas.height-(player.size+10))
+    wall.gap = Math.ceil(Math.random()*  230)
 
   }
-  if(player.posX > (wall.posX+10)){
+  if(player.posX > (wall.posX-40) && player.posY < wall.gap ||player.posX > (wall.posX-40) &&  player.posY > wall.gap+60){
     playing = false
-    saidDiv.innerHTML === 'R TO RESET'
+    saidDiv.innerHTML = 'R TO RESET'
 
 
   }
@@ -177,9 +191,3 @@ function  update(){
 
 
 }
-
-
-
-// if(words.length >  1){
-//   setInterval(update,  100)
-// }
