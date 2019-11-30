@@ -87,6 +87,7 @@ document.addEventListener('keydown', function (e) {
     wall.posX= canvas.width-10
     wall.gap = Math.ceil(Math.random()*  230)
 
+
   }
 
 
@@ -115,7 +116,7 @@ const wall ={
   gap: Math.ceil(Math.random()*  230)
 
 }
-console.log(wall.gap)
+
 
 for(let i=0;i<10;i++){
   console.log(Math.ceil(Math.random()*  230))
@@ -174,7 +175,7 @@ function  update(){
     wall.gap = Math.ceil(Math.random()*  230)
 
   }
-  if(player.posX > (wall.posX-40) && player.posY < wall.gap ||player.posX > (wall.posX-40) &&  player.posY > wall.gap+60){
+  if(player.posX > (wall.posX-40) && player.posY < wall.gap ||player.posX > (wall.posX-40) &&  player.posY > wall.gap+20){
     playing = false
     saidDiv.innerHTML = 'R TO RESET'
 
